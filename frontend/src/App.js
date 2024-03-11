@@ -144,24 +144,22 @@ class App extends Component {
         <Route
           path="/"
           exact={true}
-          render={(props) => (
+          element={
             <LoginPage
-              {...props}
               onLogin={this.loginHandler}
               loading={this.state.authLoading}
             />
-          )}
+          }
         />
         <Route
           path="/signup"
           exact={true}
-          render={(props) => (
+          element={
             <SignupPage
-              {...props}
               onSignup={this.signupHandler}
               loading={this.state.authLoading}
             />
-          )}
+          }
         />
       </Routes>
     );
