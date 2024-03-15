@@ -1,5 +1,5 @@
 const express = require("express");
-const { body } = require("express-validator");
+const { body, param } = require("express-validator");
 
 const feedControllers = require("../controllers/feedControllers");
 
@@ -7,6 +7,9 @@ const router = express.Router();
 
 // GET /feed/posts
 router.get("/posts", feedControllers.getPosts);
+
+// GET /feed/post/:id
+router.get("/post/:id", param("id").isMongoId(), feedControllers.getPost);
 
 // POST /feeds/post
 router.post(

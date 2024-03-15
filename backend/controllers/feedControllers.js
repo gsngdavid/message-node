@@ -1,7 +1,34 @@
+const post = require("../models/post");
 const Post = require("../models/post");
 const { validationResult } = require("express-validator");
 
+const getPost = (req, res, next) => {
+  const errors = validationResult(req);
+
+  if (!errors.isEmpty()) {
+    const error = new Error("Invalid params");
+    error.statusCode = 422;
+    throw error;
+  }
+
+  const { id } = req.params;
+  post
+    .findById(id)
+    .then((post) => {
+      if (!post) {
+        res.status(404).json({ message: "No post found" });
+      }
+      res.status(200).json({ post });
+    })
+    .catch((err) => {
+      const error = new Error("Fetching post failed!");
+      error.statusCode = 500;
+      next(err);
+    });
+};
+
 const getPosts = (req, res, next) => {
+  console.log("====================")
   res.json({
     posts: [
       {
@@ -52,4 +79,4 @@ const createPost = (req, res, next) => {
     });
 };
 
-module.exports = { getPosts, createPost };
+module.exports = { getPost, getPosts, createPost };
