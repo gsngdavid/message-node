@@ -17,7 +17,7 @@ const getPosts = (req, res, next) => {
   });
 };
 
-const createPost = async (req, res, next) => {
+const createPost = (req, res, next) => {
   const errors = validationResult(req);
 
   if (!errors.isEmpty()) {
@@ -46,7 +46,7 @@ const createPost = async (req, res, next) => {
     })
     .catch((err) => {
       const error = new Error("Something went wrong");
-      error.statusCode = err.status || 500
+      error.statusCode = err.status || 500;
 
       next(error);
     });
