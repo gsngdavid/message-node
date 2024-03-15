@@ -1,12 +1,21 @@
-const express = require("express")
-const feedControllers = require("../controllers/feedControllers")
+const express = require("express");
+const { body } = require("express-validator");
 
-const router = express.Router()
+const feedControllers = require("../controllers/feedControllers");
+
+const router = express.Router();
 
 // GET /feed/posts
-router.get("/posts", feedControllers.getPosts)
+router.get("/posts", feedControllers.getPosts);
 
 // POST /feeds/post
-router.post("/post", feedControllers.createPost)
+router.post(
+  "/post",
+  [
+    body("title").trim().isLength({ min: 5 }),
+    body("content").trim().isLength({ min: 5 }),
+  ],
+  feedControllers.createPost
+);
 
-module.exports = router
+module.exports = router;

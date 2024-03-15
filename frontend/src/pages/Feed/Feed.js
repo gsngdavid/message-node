@@ -137,7 +137,6 @@ class Feed extends Component {
           createdAt: resData.post.createdAt,
         };
 
-        console.log(resData)
         this.setState((prevState) => {
           let updatedPosts = [...prevState.posts];
           if (prevState.editPost) {

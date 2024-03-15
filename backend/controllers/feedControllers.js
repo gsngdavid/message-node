@@ -1,3 +1,6 @@
+const Post = require("../models/post");
+const { validationResult } = require("express-validator");
+
 const getPosts = (req, res, next) => {
   res.json({
     posts: [
@@ -14,18 +17,39 @@ const getPosts = (req, res, next) => {
   });
 };
 
-const createPost = (req, res, next) => {
+const createPost = async (req, res, next) => {
+  const errors = validationResult(req);
+
+  if (!errors.isEmpty()) {
+    const error = new Error("Validation failed, incorrect data entered!");
+    error.statusCode = 422;
+
+    throw error;
+  }
+
   const { title, content } = req.body;
-  res.json({
-    message: "Post successfully created!",
-    post: {
-      _id: new Date().toISOString(),
-      title,
-      content,
-      createdAt: new Date(),
-      creator: { name: "David" },
-    },
+
+  const post = new Post({
+    title,
+    content,
+    imageUrl: "/images/chess.jpg",
+    creator: { name: "David" },
   });
+
+  post
+    .save()
+    .then((result) => {
+      res.status(201).json({
+        message: "Post successfully created!",
+        post: result,
+      });
+    })
+    .catch((err) => {
+      const error = new Error("Something went wrong");
+      error.statusCode = err.status || 500
+
+      next(error);
+    });
 };
 
 module.exports = { getPosts, createPost };
