@@ -1,4 +1,5 @@
 import React, { Component } from "react";
+import { withRouter } from "react-router-dom";
 
 import Image from "../../../components/Image/Image";
 import "./SinglePost.css";
@@ -13,9 +14,8 @@ class SinglePost extends Component {
   };
 
   componentDidMount() {
-    console.log(this.props.match)
     const postId = this.props.match.params.postId;
-    fetch(`http://localhost:4000/feed/${postId}`)
+    fetch(`http://localhost:4000/feed/post/${postId}`)
       .then((res) => {
         if (res.status !== 200) {
           throw new Error("Failed to fetch status");
@@ -27,6 +27,7 @@ class SinglePost extends Component {
           title: resData.post.title,
           author: resData.post.creator.name,
           date: new Date(resData.post.createdAt).toLocaleDateString("en-US"),
+          image: `http://localhost:4000${resData.post.imageUrl}`,
           content: resData.post.content,
         });
       })
@@ -51,4 +52,4 @@ class SinglePost extends Component {
   }
 }
 
-export default SinglePost;
+export default withRouter(SinglePost);

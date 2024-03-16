@@ -1,4 +1,3 @@
-const post = require("../models/post");
 const Post = require("../models/post");
 const { validationResult } = require("express-validator");
 
@@ -12,36 +11,32 @@ const getPost = (req, res, next) => {
   }
 
   const { id } = req.params;
-  post
-    .findById(id)
+  Post.findById(id)
     .then((post) => {
       if (!post) {
-        res.status(404).json({ message: "No post found" });
+        const error = new Error("Could not find post");
+        error.statusCode = 404;
+        throw error;
       }
+      console.log(post)
       res.status(200).json({ post });
     })
     .catch((err) => {
-      const error = new Error("Fetching post failed!");
-      error.statusCode = 500;
+      err.statusCode = err.statusCode || 500;
       next(err);
     });
 };
 
 const getPosts = (req, res, next) => {
-  console.log("====================")
-  res.json({
-    posts: [
-      {
-        _id: "1",
-        title: "My feed",
-        content: "This is a feed",
-        creator: { name: "David" },
-        createdAt: new Date(),
-        imageUrl: "/images/duck.jpg",
-      },
-    ],
-    totalItems: 1,
-  });
+  Post.find()
+    .then((posts) => {
+      res.status(200).json({ posts });
+    })
+    .catch((err) => {
+      const error = new Error("Failed to fetch posts");
+      error.statusCode = 500;
+      next(error);
+    });
 };
 
 const createPost = (req, res, next) => {

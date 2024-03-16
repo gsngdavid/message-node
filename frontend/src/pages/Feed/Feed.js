@@ -63,7 +63,6 @@ class Feed extends Component {
           totalPosts: resData.totalItems,
           postsLoading: false,
         });
-        console.log(resData);
       })
       .catch(this.catchError);
   };
