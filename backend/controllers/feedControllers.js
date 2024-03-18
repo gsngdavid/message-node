@@ -18,7 +18,6 @@ const getPost = (req, res, next) => {
         error.statusCode = 404;
         throw error;
       }
-      console.log(post)
       res.status(200).json({ post });
     })
     .catch((err) => {
@@ -49,12 +48,19 @@ const createPost = (req, res, next) => {
     throw error;
   }
 
+  if (!req.file) {
+    const error = new Error("No file provide");
+    error.statusCode = 422;
+    throw error;
+  }
+
+  const imageUrl = req.file.path;
   const { title, content } = req.body;
 
   const post = new Post({
     title,
     content,
-    imageUrl: "/images/chess.jpg",
+    imageUrl,
     creator: { name: "David" },
   });
 
