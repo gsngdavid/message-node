@@ -126,4 +126,26 @@ const updatePost = (req, res, next) => {
     });
 };
 
-module.exports = { getPost, getPosts, createPost, updatePost };
+const deletePost = (req, res, next) => {
+  const errors = validationResult(req);
+
+  if (!errors.isEmpty) {
+    const error = new Error("Validation failed");
+    error.statusCode = 422;
+    throw error;
+  }
+
+  const { id } = req.params;
+
+  Post.findByIdAndDelete(id)
+    .then((post) => {
+      removeFile(path.join(__dirname, '..', 'public', post.imageUrl))
+      res.status(200).json({ message: "Post deleted successfully", post });
+    })
+    .catch((err) => {
+      err.statusCode = err.statusCode ?? 500;
+      next(err);
+    });
+};
+
+module.exports = { getPost, getPosts, createPost, updatePost, deletePost };
