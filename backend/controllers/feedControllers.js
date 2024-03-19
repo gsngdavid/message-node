@@ -103,7 +103,7 @@ const updatePost = (req, res, next) => {
   }
 
   const { title, content } = req.body;
-  
+
   Post.findByIdAndUpdate(postId, { title, content, imageUrl })
     .then((post) => {
       if (!post) {
@@ -113,7 +113,7 @@ const updatePost = (req, res, next) => {
       }
 
       if (imageUrl !== post.imageUrl) {
-        removeFile(path.join(__dirname, "..", "public", imageUrl));
+        removeFile(path.join(__dirname, "..", "public", post.imageUrl));
       }
 
       res.status(200).json({ post });
