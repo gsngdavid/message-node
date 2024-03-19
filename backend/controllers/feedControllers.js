@@ -1,5 +1,8 @@
+const path = require("path");
+
 const Post = require("../models/post");
 const { validationResult } = require("express-validator");
+const { removeFile } = require("../utils/helpers");
 
 const getPost = (req, res, next) => {
   const errors = validationResult(req);
@@ -54,7 +57,7 @@ const createPost = (req, res, next) => {
     throw error;
   }
 
-  const imageUrl = req.file.path;
+  const imageUrl = "images/" + req.file.filename;
   const { title, content } = req.body;
 
   const post = new Post({
@@ -80,4 +83,47 @@ const createPost = (req, res, next) => {
     });
 };
 
-module.exports = { getPost, getPosts, createPost };
+const updatePost = (req, res, next) => {
+  const errors = validationResult(req);
+  if (!errors.isEmpty()) {
+    const error = new Error("Validation failed");
+    error.statusCode = 422;
+    throw error;
+  }
+  const postId = req.params.id;
+  let imageUrl = req.body.image;
+  if (req.file) {
+    imageUrl = "images/" + req.file.filename;
+  }
+
+  if (imageUrl === "undefined") {
+    const error = new Error("No file provide");
+    error.statusCode = 422;
+    throw error;
+  }
+
+  const { title, content } = req.body;
+  
+  Post.findByIdAndUpdate(postId, { title, content, imageUrl })
+    .then((post) => {
+      if (!post) {
+        const error = new Error("Could not find a post");
+        error.statusCode = 404;
+        next(error);
+      }
+
+      if (imageUrl !== post.imageUrl) {
+        removeFile(path.join(__dirname, "..", "public", imageUrl));
+      }
+
+      res.status(200).json({ post });
+    })
+    .catch((err) => {
+      const error = new Error("Something went wrong");
+      error.statusCode = err.status || 500;
+
+      next(error);
+    });
+};
+
+module.exports = { getPost, getPosts, createPost, updatePost };

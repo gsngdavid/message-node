@@ -40,7 +40,7 @@ const fileFilter = (req, file, cb) => {
 
 const upload = multer({ storage: fileStorage, fileFilter });
 
-app.use(express.static(path.join(__dirname, "public")));
+  app.use(express.static(path.join(__dirname, "public")));
 // app.use(multer({ storage: fileStorage, fileFilter }).single("image"));
 
 app.use((req, res, next) => {
