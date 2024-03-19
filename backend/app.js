@@ -8,6 +8,7 @@ const morgan = require("morgan");
 const multer = require("multer");
 
 const feedRoutes = require("./routes/feedRoutes");
+const authRoutes = require("./routes/authRoutes");
 
 const app = express();
 
@@ -40,7 +41,7 @@ const fileFilter = (req, file, cb) => {
 
 const upload = multer({ storage: fileStorage, fileFilter });
 
-  app.use(express.static(path.join(__dirname, "public")));
+app.use(express.static(path.join(__dirname, "public")));
 // app.use(multer({ storage: fileStorage, fileFilter }).single("image"));
 
 app.use((req, res, next) => {
@@ -54,6 +55,7 @@ app.use((req, res, next) => {
 });
 
 app.use("/feed", upload.single("image"), feedRoutes);
+app.use("/auth", authRoutes);
 
 app.use((error, req, res, next) => {
   console.log(error);
