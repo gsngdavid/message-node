@@ -50,7 +50,7 @@ class Feed extends Component {
       page--;
       this.setState({ postPage: page });
     }
-    fetch("http://localhost:4000/feed/posts")
+    fetch(`http://localhost:4000/feed/posts?page=${page}`)
       .then((res) => {
         if (res.status !== 200) {
           throw new Error("Failed to fetch posts.");
@@ -243,7 +243,7 @@ class Feed extends Component {
             <Paginator
               onPrevious={this.loadPosts.bind(this, "previous")}
               onNext={this.loadPosts.bind(this, "next")}
-              lastPage={Math.ceil(this.state.totalPosts / 2)}
+              lastPage={Math.ceil(this.state.totalPosts / 3)}
               currentPage={this.state.postPage}
             >
               {this.state.posts.map((post) => (

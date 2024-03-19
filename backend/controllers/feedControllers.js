@@ -30,9 +30,24 @@ const getPost = (req, res, next) => {
 };
 
 const getPosts = (req, res, next) => {
-  Post.find()
+  const errors = validationResult(req);
+  if (!errors.isEmpty()) {
+    const error = new Error("page should be a number");
+    error.statusCode = 422;
+    throw error;
+  }
+
+  const { page } = req.query || 1;
+  const postsPerPage = 3;
+  let totalItems;
+
+  Post.countDocuments()
+    .then((count) => {
+      totalItems = count;
+      return Post.find().skip((page - 1) * postsPerPage).limit(postsPerPage);
+    })
     .then((posts) => {
-      res.status(200).json({ posts });
+      res.status(200).json({ posts, totalItems });
     })
     .catch((err) => {
       const error = new Error("Failed to fetch posts");
@@ -139,7 +154,7 @@ const deletePost = (req, res, next) => {
 
   Post.findByIdAndDelete(id)
     .then((post) => {
-      removeFile(path.join(__dirname, '..', 'public', post.imageUrl))
+      removeFile(path.join(__dirname, "..", "public", post.imageUrl));
       res.status(200).json({ message: "Post deleted successfully", post });
     })
     .catch((err) => {
