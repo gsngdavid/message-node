@@ -50,7 +50,7 @@ const login = async (req, res, next) => {
       if (!user) {
         const error = new Error("Wrong email or password");
         error.statusCode = 401;
-        next(error);
+        return next(error);
       }
       loadedUser = user;
       return bcryptjs.compare(password, user.password);
@@ -59,13 +59,13 @@ const login = async (req, res, next) => {
       if (!isEqual) {
         const error = new Error("Wrong email or password");
         error.statusCode = 401;
-        next(error);
+        return next(error);
       }
       const token = jwt.sign(
         { email, userId: loadedUser.id },
         process.env.JWT_SECRET
       );
-      res.status(200).json({ token, userId: loadedUser });
+      res.status(200).json({ token, userId: loadedUser.id });
     })
     .catch((err) => {
       err.statusCode === err.statusCode ?? 500;

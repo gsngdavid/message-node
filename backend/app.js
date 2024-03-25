@@ -6,9 +6,11 @@ const mongoose = require("mongoose");
 const bodyParser = require("body-parser");
 const morgan = require("morgan");
 const multer = require("multer");
+const cors = require("cors");
 
 const feedRoutes = require("./routes/feedRoutes");
 const authRoutes = require("./routes/authRoutes");
+const isAuth = require("./middlewares/is-auth");
 
 const app = express();
 
@@ -44,17 +46,13 @@ const upload = multer({ storage: fileStorage, fileFilter });
 app.use(express.static(path.join(__dirname, "public")));
 // app.use(multer({ storage: fileStorage, fileFilter }).single("image"));
 
-app.use((req, res, next) => {
-  res.setHeader("Access-Control-Allow-Origin", "*");
-  res.setHeader(
-    "Access-Control-Allow-Methods",
-    "GET, POST, PUT, PATCH, DELETE"
-  );
-  res.setHeader("Access-Control-Allow-Headers", "Content-Type, Authorization");
-  next();
-});
+app.use(
+  cors({
+    origin: "http://localhost:3000",
+  })
+);
 
-app.use("/feed", upload.single("image"), feedRoutes);
+app.use("/feed", isAuth, upload.single("image"), feedRoutes);
 app.use("/auth", authRoutes);
 
 app.use((error, req, res, next) => {

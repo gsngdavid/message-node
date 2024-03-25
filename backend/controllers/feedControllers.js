@@ -3,6 +3,7 @@ const path = require("path");
 const Post = require("../models/post");
 const { validationResult } = require("express-validator");
 const { removeFile } = require("../utils/helpers");
+const User = require("../models/user");
 
 const getPost = (req, res, next) => {
   const errors = validationResult(req);
@@ -44,7 +45,10 @@ const getPosts = (req, res, next) => {
   Post.countDocuments()
     .then((count) => {
       totalItems = count;
-      return Post.find().skip((page - 1) * postsPerPage).limit(postsPerPage);
+      return Post.find()
+        .populate("creator")
+        .skip((page - 1) * postsPerPage)
+        .limit(postsPerPage);
     })
     .then((posts) => {
       res.status(200).json({ posts, totalItems });
@@ -79,15 +83,20 @@ const createPost = (req, res, next) => {
     title,
     content,
     imageUrl,
-    creator: { name: "David" },
+    creator: req.userId,
   });
 
   post
     .save()
+    .then((post) => {
+      return User.findByIdAndUpdate(post.creator, {
+        $push: { posts: post.id },
+      });
+    })
     .then((result) => {
       res.status(201).json({
         message: "Post successfully created!",
-        post: result,
+        post,
       });
     })
     .catch((err) => {
