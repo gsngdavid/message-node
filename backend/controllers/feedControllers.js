@@ -22,6 +22,7 @@ const getPost = (req, res, next) => {
         error.statusCode = 404;
         throw error;
       }
+      console.log(post);
       res.status(200).json({ post });
     })
     .catch((err) => {
@@ -89,14 +90,19 @@ const createPost = (req, res, next) => {
   post
     .save()
     .then((post) => {
-      return User.findByIdAndUpdate(post.creator, {
-        $push: { posts: post.id },
-      });
+      return User.findByIdAndUpdate(
+        post.creator,
+        {
+          $push: { posts: post.id },
+        },
+        { new: true }
+      );
     })
-    .then((result) => {
+    .then((user) => {
       res.status(201).json({
         message: "Post successfully created!",
         post,
+        creator: { _id: user.id, name: user.name },
       });
     })
     .catch((err) => {
@@ -127,13 +133,19 @@ const updatePost = (req, res, next) => {
   }
 
   const { title, content } = req.body;
+  const { userId } = req;
 
-  Post.findByIdAndUpdate(postId, { title, content, imageUrl })
+  Post.findOneAndUpdate(
+    { _id: postId, creator: userId },
+    { title, content, imageUrl }
+  )
     .then((post) => {
       if (!post) {
-        const error = new Error("Could not find a post");
-        error.statusCode = 404;
-        next(error);
+        const error = new Error(
+          "Could not find a post or you're not the creator"
+        );
+        error.statusCode = 403;
+        return next(error);
       }
 
       if (imageUrl !== post.imageUrl) {
@@ -160,9 +172,20 @@ const deletePost = (req, res, next) => {
   }
 
   const { id } = req.params;
+  const { userId } = req;
 
-  Post.findByIdAndDelete(id)
-    .then((post) => {
+  Post.findOneAndDelete({ $and: [{ _id: id }, { creator: userId }] })
+    .then(async (post) => {
+      if (!post) {
+        const error = new Error(
+          "Could not find post or you're not the creator!"
+        );
+        error.statusCode = 403;
+        return next(error);
+      }
+
+      await User.findByIdAndUpdate(userId, { $pull: { posts: id } });
+
       removeFile(path.join(__dirname, "..", "public", post.imageUrl));
       res.status(200).json({ message: "Post deleted successfully", post });
     })
